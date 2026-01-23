@@ -1,6 +1,6 @@
 ---
 interface Props {
-	title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
@@ -8,36 +8,45 @@ const { title } = Astro.props;
 
 <!doctype html>
 <html lang="pt-br">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content="Blog do Cristopher Lima" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>{title} | Cristopher Lima</title>
-	</head>
-	<body class="bg-slate-50 text-slate-900 font-sans antialiased flex flex-col min-h-screen">
-		
-		<nav class="bg-slate-900 text-white shadow-lg">
-			<div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-				<a href="/" class="text-xl font-bold tracking-tight hover:text-blue-400 transition-colors">
-					CristopherLima
-				</a>
-				<div class="space-x-6 text-sm font-medium">
-					<a href="/" class="hover:text-blue-400 transition-colors">Home</a>
-					<a href="/sobre" class="hover:text-blue-400 transition-colors">Sobre</a>
-				</div>
-			</div>
-		</nav>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="Blog do Cristopher Lima" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <title>{title} | Cristopher Lima</title>
 
-		<main class="flex-grow max-w-4xl w-full mx-auto px-4 py-10">
-			<slot />
-		</main>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-YCSN4DV5Q4"></script>
+        <script is:inline>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-		<footer class="bg-white border-t border-slate-200 mt-auto">
-			<div class="max-w-4xl mx-auto px-4 py-6 text-center text-slate-500 text-sm">
-				<p>&copy; 2026 Cristopher Lima. Desenvolvido com <span class="text-orange-500 font-bold">Astro</span> & <span class="text-cyan-500 font-bold">Tailwind</span>.</p>
-			</div>
-		</footer>
+            gtag('config', 'G-YCSN4DV5Q4');
+        </script>
+    </head>
+    <body class="bg-slate-50 text-slate-900 font-sans antialiased flex flex-col min-h-screen">
+        
+        <nav class="bg-slate-900 text-white shadow-lg">
+            <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+                <a href="/" class="text-xl font-bold tracking-tight hover:text-blue-400 transition-colors">
+                    CristopherLima
+                </a>
+                <div class="space-x-6 text-sm font-medium">
+                    <a href="/" class="hover:text-blue-400 transition-colors">Home</a>
+                    <a href="/sobre" class="hover:text-blue-400 transition-colors">Sobre</a>
+                </div>
+            </div>
+        </nav>
 
-	</body>
+        <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-10">
+            <slot />
+        </main>
+
+        <footer class="bg-white border-t border-slate-200 mt-auto">
+            <div class="max-w-4xl mx-auto px-4 py-6 text-center text-slate-500 text-sm">
+                <p>&copy; 2026 Cristopher Lima. Desenvolvido com <span class="text-orange-500 font-bold">Astro</span> & <span class="text-cyan-500 font-bold">Tailwind</span>.</p>
+            </div>
+        </footer>
+
+    </body>
 </html>
