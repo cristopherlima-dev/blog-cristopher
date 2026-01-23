@@ -1,0 +1,25 @@
+---
+import Layout from './Layout.astro';
+const { frontmatter } = Astro.props;
+
+// Função para formatar a data
+const dataFormatada = new Date(frontmatter.date).toLocaleDateString('pt-BR', {
+  timeZone: 'UTC', // Garante que a data não volte um dia por causa do fuso horário
+});
+---
+
+<Layout title={frontmatter.title}>
+    <article class="prose lg:prose-xl mx-auto mt-10 p-4">
+        <h1 class="text-blue-700 font-extrabold text-4xl mb-4">{frontmatter.title}</h1>
+        
+        <div class="flex items-center text-gray-500 text-sm mb-8 border-b pb-4">
+            <span class="mr-2">✍️ {frontmatter.author}</span>
+            <span class="mx-2">•</span>
+            <span>📅 {dataFormatada}</span>
+        </div>
+
+        <div class="text-gray-800 leading-relaxed">
+            <slot />
+        </div>
+    </article>
+</Layout>
