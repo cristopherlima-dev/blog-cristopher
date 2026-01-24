@@ -1,43 +1,54 @@
-# Astro Starter Kit: Minimal
+# 🚀 Blog Pessoal - Cristopher Lima
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Meu blog, onde publico as coisas que eu gosto.
+O projeto utiliza **Server-Side Rendering (SSR)** para entregar conteúdo dinâmico com velocidade.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🛠️ Tecnologias Utilizadas
 
-## 🚀 Project Structure
+- **[Astro](https://astro.build/)** (v5.0+) - Framework web focado em conteúdo e performance.
+- **[Tailwind CSS](https://tailwindcss.com/)** - Estilização utilitária rápida e responsiva.
+- **[Cloudflare](https://pages.cloudflare.com/)** - Infraestrutura de hospedagem e Edge Computing.
+- **Markdown** - Gerenciamento de conteúdo dos artigos.
 
-Inside of your Astro project, you'll see the following folders and files:
+## ✨ Funcionalidades
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+- **⚡ Renderização Híbrida/SSR:** Configurado com `@astrojs/cloudflare` no modo `server` para respostas dinâmicas rápidas.
+- **📝 Sistema de Blog:** Artigos escritos em Markdown com suporte a metadados ricos (autor, data, descrição).
+- **🗂️ Organização de Conteúdo:**
+  - **Categorias:** Filtragem de posts por temas (ex: Carreira, Programação).
+  - **Tags:** Sistema de etiquetas com contagem de artigos por tópico.
+- **🔍 Busca Interna:** Pesquisa dinâmica que varre títulos, descrições e conteúdo dos posts em tempo real.
+- **🏠 Home Dinâmica:** Destaque automático para o post mais recente e listagem cronológica dos demais.
+- **🎨 Design Responsivo:** Layout limpo e adaptável para dispositivos móveis.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 🚀 Como Rodar o Projeto
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+1.  **Clone o repositório:**
 
-Any static assets, like images, can be placed in the `public/` directory.
+    ```bash
+    git clone https://github.com/cristopherlima-dev/blog-cristopher
+    cd blog-cristopher
+    ```
 
-## 🧞 Commands
+2.  **Instale as dependências:**
 
-All commands are run from the root of the project, from a terminal:
+    ```bash
+    npm install
+    ```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+3.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    npm run dev
+    ```
+    O site estará disponível em `http://localhost:4321`.
 
-## 👀 Want to learn more?
+## 📂 Estrutura Principal
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- `src/pages/` - Rotas do site (Home, Sobre, Busca, Tags, Categorias).
+- `src/pages/posts/` - Arquivos `.md` com os artigos do blog.
+- `src/layouts/` - Templates de layout (Base e Post).
+- `wrangler.jsonc` - Configuração de deploy para o Cloudflare.
+
+---
+
+Feito com 💙 por **Cristopher Lima**.
