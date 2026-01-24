@@ -1,0 +1,47 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// 1. Pega o parâmetro da URL (ex: /tags/setup -> tag = "setup")
+const { tag } = Astro.params;
+
+// 2. Busca todos os posts
+const allPosts = await Astro.glob('../posts/*.md');
+
+// 3. Filtra os posts que contêm a tag atual (verifica se tags existe e inclui a tag da URL)
+const posts = allPosts.filter((post) => 
+  post.frontmatter.tags && post.frontmatter.tags.includes(tag)
+);
+---
+
+<Layout title={`Tag: #${tag}`}>
+  <div class="mb-10">
+    <a href="/tags" class="inline-flex items-center text-sm text-slate-500 hover:text-blue-600 mb-4 transition-colors">
+      &larr; Voltar para Tags
+    </a>
+    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
+      Posts com a tag <span class="text-blue-600">#{tag}</span>
+    </h1>
+  </div>
+
+  <section class="space-y-6">
+    {posts.length === 0 ? (
+      <p class="text-slate-600">Nenhum artigo encontrado com esta tag.</p>
+    ) : (
+      posts.map((post) => (
+        <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 hover:shadow-md transition-shadow">
+          <a href={post.url} class="block group">
+              <h2 class="text-2xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                  {post.frontmatter.title}
+              </h2>
+              <div class="text-sm text-slate-500 mb-4">
+                  {new Date(post.frontmatter.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+              </div>
+              <p class="text-slate-600 font-medium group-hover:underline decoration-blue-600 underline-offset-4">
+                  Ler artigo completo &rarr;
+              </p>
+          </a>
+        </article>
+      ))
+    )}
+  </section>
+</Layout>

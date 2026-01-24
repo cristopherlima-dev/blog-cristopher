@@ -1,0 +1,46 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// 1. Em vez de receber via props (getStaticPaths), pegamos o parâmetro direto da URL
+const { category } = Astro.params;
+
+// 2. Buscamos todos os posts novamente
+const allPosts = await Astro.glob('../posts/*.md');
+
+// 3. Filtramos os posts que correspondem à categoria atual
+const posts = allPosts.filter((post) => post.frontmatter.category === category);
+---
+
+<Layout title={`Categoria: ${category}`}>
+  <div class="mb-10">
+    <a href="/categorias" class="inline-flex items-center text-sm text-slate-500 hover:text-blue-600 mb-4 transition-colors">
+      &larr; Voltar para Categorias
+    </a>
+    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
+      Artigos em <span class="text-blue-600">{category}</span>
+    </h1>
+  </div>
+
+  <section class="space-y-6">
+    {/* Se não houver posts, mostra uma mensagem amigável */}
+    {posts.length === 0 ? (
+      <p class="text-slate-600">Nenhum artigo encontrado nesta categoria.</p>
+    ) : (
+      posts.map((post) => (
+        <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 hover:shadow-md transition-shadow">
+          <a href={post.url} class="block group">
+              <h2 class="text-2xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                  {post.frontmatter.title}
+              </h2>
+              <div class="text-sm text-slate-500 mb-4">
+                  {new Date(post.frontmatter.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+              </div>
+              <p class="text-slate-600 font-medium group-hover:underline decoration-blue-600 underline-offset-4">
+                  Ler artigo completo &rarr;
+              </p>
+          </a>
+        </article>
+      ))
+    )}
+  </section>
+</Layout>

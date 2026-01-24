@@ -3,6 +3,8 @@ layout: ../../layouts/PostLayout.astro
 title: "Meu Setup de Desenvolvimento 2026"
 author: "Cristopher Lima"
 date: "2026-01-23"
+category: "Hardware"
+tags: ["setup", "produtividade", "ryzen"]
 ---
 
 Finalmente montei o ambiente perfeito para codar com alta performance.
