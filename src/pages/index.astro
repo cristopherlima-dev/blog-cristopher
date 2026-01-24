@@ -1,5 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+// 1. Buscar todos os posts
+const allPosts = await Astro.glob('./posts/*.md');
+
+// 2. Ordenar por data (mais recente primeiro)
+const sortedPosts = allPosts.sort((a, b) => 
+    new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
+);
+
+// 3. Separar o Destaque (1º) dos Recentes (o resto)
+const featuredPost = sortedPosts[0];
+const recentPosts = sortedPosts.slice(1);
 ---
 
 <Layout title="Início">
@@ -8,26 +20,77 @@ import Layout from '../layouts/Layout.astro';
 			Bem-vindo(a) ao <span class="text-blue-600">Blog do Cris</span>
 		</h1>
 		<p class="text-xl text-slate-600 max-w-2xl mx-auto">
-			Tecnologia e outras coisas mais
+			Tecnologia e outras coisas que eu gosto
 		</p>
 	</header>
 
-	<section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 hover:shadow-md transition-shadow">
-		<div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-			<div class="bg-blue-100 p-4 rounded-full text-4xl">
-				🚀
-			</div>
-			
-			<div>
-				<h2 class="text-2xl font-bold text-slate-800 mb-2">Destaque: Meu Setup 2026</h2>
-				<p class="text-slate-600 mb-4 leading-relaxed">
-					Conheça em detalhes os equipamentos, periféricos e softwares que utilizo para manter a alta produtividade no desenvolvimento.
-				</p>
-				
-				<a href="/posts/meu-primeiro-post" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-					Ler Artigo Completo &rarr;
-				</a>
-			</div>
-		</div>
-	</section>
+    {featuredPost && (
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <span>🔥</span> Destaque
+            </h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 hover:shadow-md transition-shadow">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="flex-1">
+                        {featuredPost.frontmatter.category && (
+                            <span class="text-blue-600 font-bold text-xs uppercase tracking-wide mb-2 block">
+                                {featuredPost.frontmatter.category}
+                            </span>
+                        )}
+                        
+                        <h2 class="text-3xl font-bold text-slate-900 mb-3">
+                            <a href={featuredPost.url} class="hover:text-blue-600 transition-colors">
+                                {featuredPost.frontmatter.title}
+                            </a>
+                        </h2>
+                        
+                        <p class="text-slate-600 mb-6 leading-relaxed line-clamp-3">
+                            {/* Tenta mostrar um resumo se existir, ou uma mensagem padrão */}
+                            {featuredPost.frontmatter.description || "Clique para ler este artigo incrível sobre " + featuredPost.frontmatter.title}
+                        </p>
+                        
+                        <div class="flex items-center gap-4">
+                            <a href={featuredPost.url} class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-blue-200 shadow-lg">
+                                Ler Artigo Completo
+                            </a>
+                            <span class="text-sm text-slate-400">
+                                {new Date(featuredPost.frontmatter.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    )}
+
+    {recentPosts.length > 0 && (
+        <section>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <span>📰</span> Recentes
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {recentPosts.map((post) => (
+                    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all hover:-translate-y-1 flex flex-col h-full">
+                        <div class="mb-4">
+                            {post.frontmatter.category && (
+                                <span class="text-blue-600 font-bold text-xs uppercase tracking-wide">
+                                    {post.frontmatter.category}
+                                </span>
+                            )}
+                            <h3 class="text-xl font-bold text-slate-800 mt-2 leading-tight group">
+                                <a href={post.url} class="group-hover:text-blue-600 transition-colors">
+                                    {post.frontmatter.title}
+                                </a>
+                            </h3>
+                        </div>
+                        
+                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                            <span>{new Date(post.frontmatter.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                            <a href={post.url} class="text-blue-600 font-medium hover:underline">Ler &rarr;</a>
+                        </div>
+                    </article>
+                ))}
+            </div>
+        </section>
+    )}
 </Layout>
