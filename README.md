@@ -1,7 +1,6 @@
 # 🚀 Blog Pessoal - Cristopher Lima
 
-Meu blog, onde publico as coisas que eu gosto.
-O projeto utiliza **Server-Side Rendering (SSR)** para entregar conteúdo dinâmico com velocidade.
+Um blog minimalista e de alta performance focado em tecnologia, desenvolvimento e experiências pessoais. O projeto utiliza **Server-Side Rendering (SSR)** para entregar conteúdo dinâmico com velocidade.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -20,6 +19,7 @@ O projeto utiliza **Server-Side Rendering (SSR)** para entregar conteúdo dinâm
 - **🔍 Busca Interna:** Pesquisa dinâmica que varre títulos, descrições e conteúdo dos posts em tempo real.
 - **🏠 Home Dinâmica:** Destaque automático para o post mais recente e listagem cronológica dos demais.
 - **🎨 Design Responsivo:** Layout limpo e adaptável para dispositivos móveis.
+- **🛡️ Privacidade (LGPD):** Banner de consentimento de cookies e controle de scripts de terceiros (Google Analytics).
 
 ## 🚀 Como Rodar o Projeto
 
@@ -42,11 +42,29 @@ O projeto utiliza **Server-Side Rendering (SSR)** para entregar conteúdo dinâm
     ```
     O site estará disponível em `http://localhost:4321`.
 
+## 📝 Criando Novos Posts
+
+O projeto conta com uma ferramenta CLI para agilizar a criação de artigos padronizados.
+
+1.  **Execute o comando:**
+
+    ```bash
+    npm run new-post
+    ```
+
+2.  **Preencha as informações:**
+    O terminal fará perguntas interativas (Título, Descrição, Categoria, Tags).
+
+3.  **Escreva:**
+    O arquivo `.md` será gerado automaticamente em `src/pages/posts/` com a data atual e o cabeçalho configurado.
+
 ## 📂 Estrutura Principal
 
 - `src/pages/` - Rotas do site (Home, Sobre, Busca, Tags, Categorias).
 - `src/pages/posts/` - Arquivos `.md` com os artigos do blog.
 - `src/layouts/` - Templates de layout (Base e Post).
+- `src/components/` - Componentes reutilizáveis (CookieBanner, etc).
+- `scripts/` - Scripts de automação (geração de posts).
 - `wrangler.jsonc` - Configuração de deploy para o Cloudflare.
 
 ---
