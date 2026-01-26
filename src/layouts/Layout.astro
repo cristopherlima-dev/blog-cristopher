@@ -19,12 +19,19 @@ const { title } = Astro.props;
     </head>
     <body class="bg-slate-50 text-slate-900 font-sans antialiased flex flex-col min-h-screen">
         
-        <nav class="bg-slate-900 text-white shadow-lg">
+        <nav class="bg-slate-900 text-white shadow-lg relative z-40">
             <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
                 <a href="/" class="text-xl font-bold tracking-tight hover:text-blue-400 transition-colors">
                     Cristopher Lima
                 </a>
-                <div class="space-x-6 text-sm font-medium flex items-center">
+
+                <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white focus:outline-none p-2" aria-label="Abrir Menu">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <div class="hidden md:flex space-x-6 text-sm font-medium items-center">
                     <a href="/" class="hover:text-blue-400 transition-colors">Home</a>
                     <a href="/categorias" class="hover:text-blue-400 transition-colors">Categorias</a>
                     <a href="/tags" class="hover:text-blue-400 transition-colors">Tags</a>
@@ -35,6 +42,22 @@ const { title } = Astro.props;
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div id="mobile-menu" class="hidden md:hidden bg-slate-800 border-t border-slate-700 absolute w-full left-0">
+                <div class="flex flex-col px-4 py-4 space-y-4 text-sm font-medium">
+                    <a href="/" class="block hover:text-blue-400 transition-colors">Home</a>
+                    <a href="/categorias" class="block hover:text-blue-400 transition-colors">Categorias</a>
+                    <a href="/tags" class="block hover:text-blue-400 transition-colors">Tags</a>
+                    <a href="/sobre" class="block hover:text-blue-400 transition-colors">Sobre</a>
+                    <a href="/politica-privacidade" class="block hover:text-blue-400 transition-colors">Privacidade</a>
+                    <a href="/busca" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Pesquisar
                     </a>
                 </div>
             </div>
@@ -55,5 +78,16 @@ const { title } = Astro.props;
         </footer>
 
         <CookieBanner />
+
+        <script is:inline>
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+
+            if(btn && menu) {
+                btn.addEventListener('click', () => {
+                    menu.classList.toggle('hidden');
+                });
+            }
+        </script>
     </body>
 </html>
