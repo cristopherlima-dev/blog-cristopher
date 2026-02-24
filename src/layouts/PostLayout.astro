@@ -1,11 +1,16 @@
 ---
 import Layout from './Layout.astro';
-const { frontmatter } = Astro.props;
+
+// 1. MUDANÇA AQUI: O Astro já passa a variável 'headings' automaticamente junto com o frontmatter!
+const { frontmatter, headings } = Astro.props;
 
 // Função para formatar a data
 const dataFormatada = new Date(frontmatter.date).toLocaleDateString('pt-BR', {
   timeZone: 'UTC',
 });
+
+// Filtramos os títulos para pegar apenas os H2 e H3 (assim o índice não fica poluído com títulos muito pequenos)
+const indice = headings?.filter((heading) => heading.depth === 2 || heading.depth === 3) || [];
 ---
 
 <Layout title={frontmatter.title}>
@@ -24,7 +29,26 @@ const dataFormatada = new Date(frontmatter.date).toLocaleDateString('pt-BR', {
             <span>📅 {dataFormatada}</span>
         </div>
 
-        <div class="text-gray-800 leading-relaxed">
+        {/* 2. MUDANÇA AQUI: Renderização do Índice (Table of Contents) */}
+        {indice.length > 0 && (
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10 not-prose">
+                <h2 class="text-lg font-bold text-slate-900 mb-4">📖 Índice</h2>
+                <ul class="space-y-3">
+                    {indice.map((heading) => (
+                        <li style={{ paddingLeft: `${(heading.depth - 2) * 1.5}rem` }}>
+                            <a 
+                                href={`#${heading.slug}`} 
+                                class="text-blue-600 hover:underline hover:text-blue-800 text-sm font-medium transition-colors"
+                            >
+                                {heading.text}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+
+        <div class="text-gray-800 leading-relaxed relative">
             <slot />
         </div>
 
@@ -41,3 +65,49 @@ const dataFormatada = new Date(frontmatter.date).toLocaleDateString('pt-BR', {
         )}
     </article>
 </Layout>
+
+{/* 3. MUDANÇA AQUI: Script para injetar o botão de copiar nos blocos de código */}
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Encontra todos os blocos de código na página
+        const codeBlocks = document.querySelectorAll('pre');
+
+        codeBlocks.forEach((pre) => {
+            // Garante que o bloco tem posição relativa para ancorar o botão
+            pre.style.position = 'relative';
+
+            // Cria o botão
+            const copyButton = document.createElement('button');
+            copyButton.className = 'absolute top-3 right-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition-all backdrop-blur-sm border border-slate-600';
+            copyButton.innerHTML = 'Copiar';
+
+            // Adiciona a ação de clique
+            copyButton.addEventListener('click', async () => {
+                // Pega o texto puro dentro do código
+                const code = pre.querySelector('code');
+                const text = code ? code.innerText : pre.innerText;
+
+                try {
+                    await navigator.clipboard.writeText(text);
+                    
+                    // Feedback visual
+                    copyButton.innerHTML = '✅ Copiado!';
+                    copyButton.classList.replace('text-slate-300', 'text-green-400');
+                    copyButton.classList.replace('bg-slate-700/50', 'bg-slate-800');
+                    
+                    // Retorna ao estado normal após 2 segundos
+                    setTimeout(() => {
+                        copyButton.innerHTML = 'Copiar';
+                        copyButton.classList.replace('text-green-400', 'text-slate-300');
+                        copyButton.classList.replace('bg-slate-800', 'bg-slate-700/50');
+                    }, 2000);
+                } catch (err) {
+                    console.error('Falha ao copiar', err);
+                }
+            });
+
+            // Adiciona o botão dentro do <pre>
+            pre.appendChild(copyButton);
+        });
+    });
+</script>
