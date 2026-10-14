@@ -155,3 +155,16 @@ collections:
           - { label: Título, name: title, widget: string }
           - { label: Frase de destaque, name: subtitle, widget: string }
           - { label: Conteúdo, name: body, widget: markdown }
+      - name: privacidade
+        label: Política de Privacidade
+        file: src/content/paginas/privacidade.md
+        fields:
+          - { label: Título, name: title, widget: string }
+          - label: Última atualização
+            name: updated
+            widget: datetime
+            format: YYYY-MM-DD
+            date_format: DD/MM/YYYY
+            time_format: false
+            hint: Mude esta data sempre que alterar o texto.
+          - { label: Conteúdo, name: body, widget: markdown }
