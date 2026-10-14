@@ -1,0 +1,43 @@
+{
+  "titulo": "Cristopher Lima",
+  "descricao": "Problemas reais de TI, resolvidos e documentados: SQL Server, C#, Python, automações e ERP de transporte.",
+  "autor": "Cristopher Lima",
+  "avatar": "https://github.com/cristopherlima-dev.png",
+  "logo": {
+    "prefixo": "~/cristopher",
+    "destaque": "lima"
+  },
+  "menu": [
+    { "texto": "posts", "url": "/" },
+    { "texto": "categorias", "url": "/categorias" },
+    { "texto": "tags", "url": "/tags" },
+    { "texto": "sobre", "url": "/sobre" }
+  ],
+  "hero": {
+    "prompt": "cris@curitiba:~$ whoami",
+    "titulo": "Problemas reais de TI,",
+    "tituloDestaque": "resolvidos e documentados.",
+    "subtitulo": "Sou o Cris, encarregado de TI numa transportadora. Escrevo sobre o que resolvo no dia a dia — SQL Server, C#, Python, automações e ERP de transporte — com o contexto real, não só o código.",
+    "botaoPrincipal": { "texto": "Ler os posts →", "url": "#posts" },
+    "botaoSecundario": { "texto": "RSS", "url": "/rss.xml" }
+  },
+  "sobreResumo": {
+    "cargo": "Encarregado de TI · Curitiba",
+    "texto": "Infra, banco de dados e automação numa transportadora. Uso IA todo dia — mas entendendo o que ela entrega.",
+    "linkTexto": "mais sobre mim →",
+    "linkUrl": "/sobre"
+  },
+  "stack": ["csharp", "python", "sqlserver", "flutter", "fastapi", "astro", "winforms"],
+  "newsletter": {
+    "ativa": false,
+    "titulo": "Receba os posts por e-mail",
+    "texto": "Um e-mail quando sair post novo. Sem spam.",
+    "url": ""
+  },
+  "redes": [
+    { "nome": "github", "url": "https://github.com/cristopherlima-dev" },
+    { "nome": "linkedin", "url": "https://www.linkedin.com/in/cristopherlima-dev/" },
+    { "nome": "rss", "url": "/rss.xml" }
+  ],
+  "rodape": "feito com Astro, hospedado na Cloudflare"
+}
