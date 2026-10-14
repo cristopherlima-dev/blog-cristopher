@@ -1,0 +1,17 @@
+# Todo arquivo de texto fica com final de linha LF no repositório e no disco
+* text=auto eol=lf
+
+# Scripts do Windows precisam de CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Arquivos binários: o Git não deve mexer neles
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
