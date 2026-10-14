@@ -1,0 +1,157 @@
+# ============================================================
+# Configuração do painel (Sveltia CMS)
+# Define ONDE ficam os arquivos e QUAIS campos aparecem no painel.
+# ============================================================
+
+# Onde o painel salva: direto no seu repositório do GitHub
+backend:
+  name: github
+  repo: cristopherlima-dev/blog-cristopher
+  branch: main
+
+# Endereço do site (usado no botão "ver no site" do painel)
+site_url: https://www.cristopherlima.com.br
+display_url: https://www.cristopherlima.com.br
+
+# Imagens enviadas pelo painel: onde ficam no projeto e como aparecem no site
+media_folder: public/images
+public_folder: /images
+
+# Nome do arquivo gerado a partir do título: sem acento, minúsculo, com hífen
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  # ----------------------------------------------------------
+  # 1) POSTS — cada post vira um arquivo .md em src/content/posts
+  # ----------------------------------------------------------
+  - name: posts
+    label: Posts
+    label_singular: Post
+    folder: src/content/posts
+    create: true
+    slug: "{{slug}}"
+    summary: "{{date}} · {{title}}"
+    sortable_fields: [date, title]
+    fields:
+      - { label: Título, name: title, widget: string }
+      - label: Descrição
+        name: description
+        widget: text
+        hint: Resumo curto. Aparece no card da Home e no Google.
+      - label: Data
+        name: date
+        widget: datetime
+        format: YYYY-MM-DD
+        date_format: DD/MM/YYYY
+        time_format: false
+      - label: Categoria
+        name: category
+        widget: string
+        hint: "Ex.: Tutorial, Banco de dados, Automação, Carreira"
+      - label: Tags
+        name: tags
+        widget: list
+        hint: "Separe por vírgula. Ex.: python, sqlserver"
+      - label: Rascunho
+        name: draft
+        widget: boolean
+        default: false
+        hint: Ligado = o post NÃO aparece no site.
+      - { label: Autor, name: author, widget: hidden, default: Cristopher Lima }
+      - { label: Conteúdo, name: body, widget: markdown }
+
+  # ----------------------------------------------------------
+  # 2) SITE — textos e links fixos (arquivo src/data/site.json)
+  # ----------------------------------------------------------
+  - name: site
+    label: Site
+    files:
+      - name: config
+        label: Textos e links do site
+        file: src/data/site.json
+        fields:
+          - { label: Título do site, name: titulo, widget: string }
+          - label: Descrição do site
+            name: descricao
+            widget: text
+            hint: Usada no Google e ao compartilhar o link.
+          - { label: Autor, name: autor, widget: string }
+          - { label: Foto (URL), name: avatar, widget: string }
+          - label: Logo
+            name: logo
+            widget: object
+            fields:
+              - { label: Parte branca, name: prefixo, widget: string }
+              - { label: Parte colorida, name: destaque, widget: string }
+          - label: Menu
+            name: menu
+            widget: list
+            summary: "{{texto}} → {{url}}"
+            fields:
+              - { label: Texto, name: texto, widget: string }
+              - { label: Link, name: url, widget: string }
+          - label: Topo da Home
+            name: hero
+            widget: object
+            fields:
+              - { label: Linha do terminal, name: prompt, widget: string }
+              - { label: Título, name: titulo, widget: string }
+              - { label: Título (parte colorida), name: tituloDestaque, widget: string }
+              - { label: Subtítulo, name: subtitulo, widget: text }
+              - label: Botão principal
+                name: botaoPrincipal
+                widget: object
+                fields:
+                  - { label: Texto, name: texto, widget: string }
+                  - { label: Link, name: url, widget: string }
+              - label: Botão secundário
+                name: botaoSecundario
+                widget: object
+                fields:
+                  - { label: Texto, name: texto, widget: string }
+                  - { label: Link, name: url, widget: string }
+          - label: Resumo "sobre" (coluna lateral)
+            name: sobreResumo
+            widget: object
+            fields:
+              - { label: Cargo, name: cargo, widget: string }
+              - { label: Texto, name: texto, widget: text }
+              - { label: Texto do link, name: linkTexto, widget: string }
+              - { label: Link, name: linkUrl, widget: string }
+          - label: Stack
+            name: stack
+            widget: list
+            hint: Separe por vírgula.
+          - label: Newsletter
+            name: newsletter
+            widget: object
+            fields:
+              - { label: Mostrar no site, name: ativa, widget: boolean }
+              - { label: Título, name: titulo, widget: string }
+              - { label: Texto, name: texto, widget: text }
+              - { label: Link do formulário, name: url, widget: string, required: false }
+          - label: Redes e links do rodapé
+            name: redes
+            widget: list
+            summary: "{{nome}} → {{url}}"
+            fields:
+              - { label: Nome, name: nome, widget: string }
+              - { label: Link, name: url, widget: string }
+          - { label: Texto do rodapé, name: rodape, widget: string }
+
+  # ----------------------------------------------------------
+  # 3) PÁGINAS — páginas fixas do site, como a /sobre
+  # ----------------------------------------------------------
+  - name: paginas
+    label: Páginas
+    files:
+      - name: sobre
+        label: Sobre
+        file: src/content/paginas/sobre.md
+        fields:
+          - { label: Título, name: title, widget: string }
+          - { label: Frase de destaque, name: subtitle, widget: string }
+          - { label: Conteúdo, name: body, widget: markdown }
