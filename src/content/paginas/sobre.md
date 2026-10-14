@@ -5,7 +5,7 @@ subtitle: Resolvendo problemas com código, gente, café e energético.
 
 Sou o Cristopher Lima (ou Cris, se achar mais fácil). Trabalho como encarregado de TI numa transportadora e divido meu dia entre apagar incêndios, gerar relatórios em Crystal Reports, liderar dois pequenos gafanhotos muito competentes e desenvolver soluções que vão desde rotinas em C# a automações em Python — mais recentemente, alguma coisa em Go e qualquer outra stack que eu possa aprender a usar em pouco tempo, pedindo ajuda dos GPTs da vida.
 
-Comecei em infraestrutura (active directory, servidores linux, voip, microtik...), fui migrando para sistemas e desenvolvimento, e agora estou aprendendo a pensar como gestor sem largar o código. É uma carreira meio Frankenstein, e é justamente por isso que tem bastante material pra contar.
+Comecei em infraestrutura (active directory, servidores linux, voip, MikroTik...), fui migrando para sistemas e desenvolvimento, e agora estou aprendendo a pensar como gestor sem largar o código. É uma carreira meio Frankenstein, e é justamente por isso que tem bastante material pra contar.
 
 Trabalho em TI interna de transportadora, não numa empresa de tecnologia. Isso significa: superiores que não falam informatiquês, prazos apertados, e a missão clara de transformar problemas do negócio em soluções de baixo custo e grande resultado. Já passei madrugadas codando rotinas pra usar na manhã do dia seguinte. Já levei uma semana (ou mais) para achar um bug em relatório legado. Cada uma dessas situações ensina algo. Coisas bem diferentes, mas ensina.
 

@@ -54,7 +54,8 @@ collections:
       - label: Tags
         name: tags
         widget: list
-        hint: "Separe por vírgula. Ex.: python, sqlserver"
+        hint: "Uma tag por item. Clique em Adicionar para incluir outra."
+        field: { label: Tag, name: tag, widget: string }
       - label: Rascunho
         name: draft
         widget: boolean
@@ -124,7 +125,8 @@ collections:
           - label: Stack
             name: stack
             widget: list
-            hint: Separe por vírgula.
+            hint: "Uma tecnologia por item."
+            field: { label: Tecnologia, name: item, widget: string }
           - label: Newsletter
             name: newsletter
             widget: object
