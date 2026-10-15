@@ -9,8 +9,12 @@ Branch atual: `feat/cms-layout`
 - [x] 2. Textos e links do site em `src/data/site.json`
 - [x] 3. Configuração do painel (`public/admin/config.yml`)
 - [x] 3b. Página Sobre editável (`src/content/paginas/sobre.md`)
-- [ ] 3c. Política de privacidade editável e revisada para LGPD (`src/content/paginas/privacidade.md`)
-- [ ] 4. Testar o painel localmente (modo "Work with Local Repository")
+- [x] 3c. Política de privacidade editável e revisada para LGPD (`src/content/paginas/privacidade.md`)
+- [x] 4. Testar o painel localmente (modo "Work with Local Repository")
+  - [x] Tags e stack como lista de itens
+  - [x] Tabela e linha divisória no editor
+  - [x] Botão "Código" com seleção de linguagem (componente próprio no `admin/index.html`)
+  - [ ] Teste de envio de imagem (fazer na etapa 5)
 - [ ] 5. Layout novo (visual do mockup), lendo os textos do `site.json`
   - [ ] Fontes hospedadas no próprio site (sem Google Fonts)
   - [ ] `Layout.astro` (cabeçalho, rodapé, banner de cookies)
@@ -26,6 +30,10 @@ Branch atual: `feat/cms-layout`
 - [ ] 8. Merge na `main` e publicação
 
 ## Backlog
+
+- [ ] **Proteger o acesso ao painel `/admin`** (depois de publicar tudo). Hoje só quem tem permissão de escrita no repositório do GitHub consegue salvar, mas a página do painel fica visível. Opções a avaliar:
+  - Cloudflare Access (Zero Trust, grátis): só libera `/admin` para o meu e-mail ou para um certificado instalado no meu computador
+  - Não publicar o painel: usar só localmente (`npm run dev` + "Repositório Local")
 
 - [ ] **E-mail de contato do blog** (ex.: `contato@cristopherlima.com.br`) via Cloudflare Email Routing (grátis), encaminhando para o e-mail pessoal. Necessário como canal LGPD na Política de Privacidade — atualizar a política quando estiver pronto.
 - [ ] SEO: meta tags Open Graph, descrição por página, sitemap

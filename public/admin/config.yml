@@ -62,7 +62,7 @@ collections:
         default: false
         hint: Ligado = o post NÃO aparece no site.
       - { label: Autor, name: author, widget: hidden, default: Cristopher Lima }
-      - { label: Conteúdo, name: body, widget: markdown }
+      - { label: Conteúdo, name: body, widget: markdown, editor_components: [codigo, image, table, hr] }
 
   # ----------------------------------------------------------
   # 2) SITE — textos e links fixos (arquivo src/data/site.json)
@@ -156,7 +156,7 @@ collections:
         fields:
           - { label: Título, name: title, widget: string }
           - { label: Frase de destaque, name: subtitle, widget: string }
-          - { label: Conteúdo, name: body, widget: markdown }
+          - { label: Conteúdo, name: body, widget: markdown, editor_components: [codigo, image, table, hr] }
       - name: privacidade
         label: Política de Privacidade
         file: src/content/paginas/privacidade.md
@@ -169,4 +169,4 @@ collections:
             date_format: DD/MM/YYYY
             time_format: false
             hint: Mude esta data sempre que alterar o texto.
-          - { label: Conteúdo, name: body, widget: markdown }
+          - { label: Conteúdo, name: body, widget: markdown, editor_components: [codigo, image, table, hr] }

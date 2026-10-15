@@ -8,6 +8,53 @@
     <title>Painel | Cristopher Lima</title>
     <!-- Carrega o Sveltia CMS; ele lê o config.yml desta mesma pasta -->
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js" type="module"></script>
+
+    <!--
+      Componente "Código com linguagem".
+      O bloco de código nativo do Sveltia não deixa escolher a linguagem,
+      então criamos um componente próprio: um menu com a linguagem + a caixa do código.
+      Ele grava o bloco no formato padrão do Markdown:  ```sql ... ```
+    -->
+    <script type="module">
+      const linguagens = [
+        { label: 'SQL', value: 'sql' },
+        { label: 'C#', value: 'csharp' },
+        { label: 'Python', value: 'python' },
+        { label: 'JavaScript', value: 'javascript' },
+        { label: 'TypeScript', value: 'typescript' },
+        { label: 'Dart / Flutter', value: 'dart' },
+        { label: 'Go', value: 'go' },
+        { label: 'PowerShell', value: 'powershell' },
+        { label: 'Bash / Terminal', value: 'bash' },
+        { label: 'CMD / Batch', value: 'bat' },
+        { label: 'JSON', value: 'json' },
+        { label: 'YAML', value: 'yaml' },
+        { label: 'XML', value: 'xml' },
+        { label: 'HTML', value: 'html' },
+        { label: 'CSS', value: 'css' },
+        { label: 'Astro', value: 'astro' },
+        { label: 'Markdown', value: 'markdown' },
+        { label: 'Texto simples', value: 'text' },
+      ];
+
+      window.CMS.registerEditorComponent({
+        id: 'codigo',
+        label: 'Código',
+        icon: 'code_blocks',
+        trigger: 'button',
+        fields: [
+          { name: 'lang', label: 'Linguagem', widget: 'select', options: linguagens, default: 'sql' },
+          { name: 'code', label: 'Código', widget: 'text' },
+        ],
+        // Reconhece blocos já existentes no texto: ```linguagem (quebra) código (quebra) ```
+        pattern: /^```([\w#+-]*)\n([\s\S]*?)\n```$/m,
+        fromBlock: (match) => ({ lang: match[1] || 'text', code: match[2] }),
+        // Gera o Markdown que vai para o arquivo .md
+        toBlock: ({ lang = 'text', code = '' } = {}) => '```' + lang + '\n' + code + '\n```',
+        // Como o bloco aparece na pré-visualização do painel
+        toPreview: ({ lang = 'text', code = '' } = {}) => '```' + lang + '\n' + code + '\n```',
+      });
+    </script>
   </head>
   <body></body>
 </html>
