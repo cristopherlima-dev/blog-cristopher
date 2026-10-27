@@ -1,0 +1,42 @@
+---
+// Política de Privacidade — o texto vem de src/content/paginas/privacidade.md
+// (painel → Páginas → Política de Privacidade)
+import { getEntry, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const pagina = await getEntry('paginas', 'privacidade');
+if (!pagina) throw new Error('Arquivo src/content/paginas/privacidade.md não encontrado');
+const { Content } = await render(pagina);
+
+const atualizada = pagina.data.updated?.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' });
+---
+
+<Layout title={pagina.data.title} description="Como este blog trata seus dados e cookies, de acordo com a LGPD.">
+  <article class="mx-auto max-w-[760px] px-6 pb-20 pt-14">
+    <p class="mb-5 font-mono text-[13px] text-suave">
+      <span class="text-destaque">cris@curitiba</span>:<span class="text-link">~</span>$ cat privacidade.md
+    </p>
+
+    <h1 class="mb-4 text-4xl font-semibold tracking-tight text-white sm:text-[44px]">{pagina.data.title}</h1>
+    {atualizada && (
+      <p class="mb-10 border-b border-borda pb-6 font-mono text-[13px] text-suave">
+        última atualização: {atualizada}
+      </p>
+    )}
+
+    <div class="prose prose-blog max-w-none prose-th:text-texto prose-code:before:content-none prose-code:after:content-none">
+      <Content />
+    </div>
+
+    <div class="mt-12 flex flex-wrap items-center gap-4 rounded-xl border border-borda bg-superficie p-6">
+      <p class="m-0 flex-1 text-[15px] text-suave">Quer mudar sua escolha sobre os cookies?</p>
+      <button
+        type="button"
+        onclick="document.getElementById('btn-reset-cookies')?.click()"
+        class="min-h-[44px] rounded-lg bg-destaque px-5 text-sm font-semibold text-fundo transition-opacity hover:opacity-90"
+      >
+        Gerenciar cookies
+      </button>
+    </div>
+  </article>
+</Layout>
