@@ -44,6 +44,8 @@ const ano = new Date().getFullYear();
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title={site.titulo} href="/rss.xml" />
     <meta name="theme-color" content="#0D1117" />
+    <!-- O site é sempre escuro: barras de rolagem, campos e "modo escuro automático" dos navegadores respeitam isso -->
+    <meta name="color-scheme" content="dark" />
 
     <!-- Como o link aparece ao ser compartilhado (WhatsApp, LinkedIn...) -->
     <meta property="og:type" content={type} />
@@ -123,6 +125,8 @@ const ano = new Date().getFullYear();
     </script>
 
     <style is:global>
+      html { color-scheme: dark; }
+
       /* Cursor piscando ao lado do logo (pisca sempre, por escolha do autor) */
       @keyframes piscar { 50% { opacity: 0; } }
       .cursor { animation: piscar 1.1s step-end infinite; }

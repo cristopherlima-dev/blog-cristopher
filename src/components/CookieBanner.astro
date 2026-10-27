@@ -1,90 +1,112 @@
-<div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-white p-4 transform translate-y-full transition-transform duration-300 z-50 shadow-lg border-t border-slate-700 hidden">
-    <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="text-sm text-slate-300">
-            <p>
-                Utilizamos cookies para analisar o tráfego e melhorar sua experiência. 
-                Ao aceitar, você concorda com nossa <a href="/politica-privacidade" class="text-blue-400 hover:underline">Política de Privacidade</a>.
-            </p>
-        </div>
-        <div class="flex gap-3">
-            <button id="btn-reject" class="px-4 py-2 text-sm font-bold text-slate-300 hover:text-white transition-colors">
-                Recusar
-            </button>
-            <button id="btn-accept" class="px-6 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md">
-                Aceitar
-            </button>
-        </div>
+---
+// Banner de consentimento de cookies (LGPD).
+// Textos e ID do Analytics vêm do site.json (editáveis no painel → Site).
+// Regra principal: o Google Analytics SÓ é carregado depois de "Aceitar".
+import site from '../data/site.json';
+
+const c = site.cookies;
+const gaId = c.analyticsId;
+---
+
+<div
+  id="cookie-banner"
+  role="dialog"
+  aria-live="polite"
+  aria-label="Aviso de cookies"
+  class="fixed inset-x-0 bottom-0 z-50 hidden translate-y-full border-t border-borda bg-barra/95 backdrop-blur transition-transform duration-300"
+>
+  <div class="mx-auto flex max-w-[1120px] flex-wrap items-center justify-between gap-4 px-6 py-4">
+    <p class="m-0 max-w-2xl text-sm leading-relaxed text-suave">
+      <span class="mr-2 font-mono text-destaque">$ cookies</span>
+      {c.texto}
+      <a href={c.linkUrl} class="text-texto underline decoration-borda-forte underline-offset-4 hover:decoration-destaque">{c.linkTexto}</a>.
+    </p>
+    <div class="flex gap-3">
+      <button
+        id="btn-reject"
+        type="button"
+        class="min-h-[44px] rounded-lg border border-borda-forte px-4 font-mono text-sm text-suave transition-colors hover:border-suave hover:text-texto"
+      >
+        {c.botaoRecusar}
+      </button>
+      <button
+        id="btn-accept"
+        type="button"
+        class="min-h-[44px] rounded-lg bg-destaque px-5 text-sm font-semibold text-fundo transition-opacity hover:opacity-90"
+      >
+        {c.botaoAceitar}
+      </button>
     </div>
+  </div>
 </div>
 
-<script is:inline>
-    // ID do seu GTM/GA4 (Mantido inalterado)
-    const GTM_ID = 'G-YCSN4DV5Q4';
+<script is:inline define:vars={{ gaId }}>
+  // Carrega o Google Analytics (só é chamado após o consentimento)
+  function loadGoogleAnalytics() {
+    if (!gaId || window.__gaLoaded) return;
+    window.__gaLoaded = true;
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+    document.head.appendChild(script);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', gaId);
+  }
 
-    function loadGoogleAnalytics() {
-        // Cria a tag script do GA4 dinamicamente
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${GTM_ID}`;
-        document.head.appendChild(script);
+  // Lê/grava a escolha. O try/catch evita erro em navegadores que bloqueiam o armazenamento.
+  function getConsent() {
+    try { return localStorage.getItem('cookie-consent'); } catch (e) { return null; }
+  }
+  function setConsent(valor) {
+    try { localStorage.setItem('cookie-consent', valor); } catch (e) {}
+  }
 
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', GTM_ID);
-        
-        console.log('Google Analytics Carregado');
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+    const banner = document.getElementById('cookie-banner');
+    const show = () => {
+      banner.classList.remove('hidden');
+      setTimeout(() => banner.classList.remove('translate-y-full'), 50);
+    };
+    const hide = () => banner.classList.add('translate-y-full');
 
-    // Lógica do Banner
-    document.addEventListener('DOMContentLoaded', () => {
-        const banner = document.getElementById('cookie-banner');
-        const btnAccept = document.getElementById('btn-accept');
-        const btnReject = document.getElementById('btn-reject');
-        
-        // Verifica se já existe uma escolha salva
-        const consent = localStorage.getItem('cookie-consent');
+    const consent = getConsent();
+    if (consent === 'accepted') loadGoogleAnalytics();
+    else if (!consent) show();
 
-        if (consent === 'accepted') {
-            loadGoogleAnalytics();
-        } else if (!consent) {
-            // Se não houver escolha, mostra o banner (remove o hidden e anima)
-            banner.classList.remove('hidden');
-            // Pequeno delay para a animação de subida funcionar
-            setTimeout(() => {
-                banner.classList.remove('translate-y-full');
-            }, 100);
-        }
-
-        // Ação de Aceitar
-        btnAccept.addEventListener('click', () => {
-            localStorage.setItem('cookie-consent', 'accepted');
-            banner.classList.add('translate-y-full'); // Esconde
-            loadGoogleAnalytics(); // Carrega o GA
-        });
-
-        // Ação de Recusar
-        btnReject.addEventListener('click', () => {
-            localStorage.setItem('cookie-consent', 'rejected');
-            banner.classList.add('translate-y-full'); // Esconde
-            // Não carregamos o GA
-        });
-
-        // --- NOVO: Lógica para o botão do Rodapé "Gerenciar Cookies" ---
-        const btnReset = document.getElementById('btn-reset-cookies');
-        if (btnReset) {
-            btnReset.addEventListener('click', (e) => {
-                e.preventDefault(); // Evita comportamento padrão de link se houver
-                
-                // Remove a escolha salva para permitir nova decisão
-                localStorage.removeItem('cookie-consent');
-                
-                // Mostra o banner novamente
-                banner.classList.remove('hidden');
-                setTimeout(() => {
-                    banner.classList.remove('translate-y-full');
-                }, 100);
-            });
-        }
+    document.getElementById('btn-accept').addEventListener('click', () => {
+      setConsent('accepted');
+      hide();
+      loadGoogleAnalytics();
     });
+
+    document.getElementById('btn-reject').addEventListener('click', () => {
+      const tinhaAceitado = window.__gaLoaded;
+      setConsent('rejected');
+      hide();
+      // Se a pessoa tinha aceitado antes, apaga os cookies do Analytics e recarrega sem ele
+      if (tinhaAceitado) {
+        const dominio = location.hostname.replace(/^www\./, '');
+        document.cookie.split(';').forEach((c) => {
+          const nome = c.split('=')[0].trim();
+          if (nome.startsWith('_ga')) {
+            ['', '; domain=' + dominio, '; domain=.' + dominio].forEach((d) => {
+              document.cookie = nome + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/' + d;
+            });
+          }
+        });
+        location.reload();
+      }
+    });
+
+    // Botão "Gerenciar cookies" do rodapé: apaga a escolha e mostra o banner de novo
+    const btnReset = document.getElementById('btn-reset-cookies');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        try { localStorage.removeItem('cookie-consent'); } catch (e) {}
+        show();
+      });
+    }
+  });
 </script>

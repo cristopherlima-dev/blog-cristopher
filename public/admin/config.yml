@@ -143,6 +143,19 @@ collections:
               - { label: Nome, name: nome, widget: string }
               - { label: Link, name: url, widget: string }
           - { label: Texto do rodapé, name: rodape, widget: string }
+          - label: Banner de cookies
+            name: cookies
+            widget: object
+            fields:
+              - { label: Texto, name: texto, widget: text }
+              - { label: Texto do link, name: linkTexto, widget: string }
+              - { label: Link, name: linkUrl, widget: string }
+              - { label: Botão aceitar, name: botaoAceitar, widget: string }
+              - { label: Botão recusar, name: botaoRecusar, widget: string }
+              - label: ID do Google Analytics
+                name: analyticsId
+                widget: string
+                hint: "Formato G-XXXXXXXXXX. Só é carregado se o visitante aceitar."
 
   # ----------------------------------------------------------
   # 3) PÁGINAS — páginas fixas do site, como a /sobre

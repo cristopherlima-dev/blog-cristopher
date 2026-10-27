@@ -74,5 +74,13 @@
       "url": "/rss.xml"
     }
   ],
-  "rodape": "feito com Astro, hospedado na Cloudflare"
+  "rodape": "feito com Astro, hospedado na Cloudflare",
+  "cookies": {
+    "texto": "Uso cookies do Google Analytics para entender quais posts são mais lidos. Eles só são ativados se você aceitar.",
+    "linkTexto": "Política de Privacidade",
+    "linkUrl": "/politica-privacidade",
+    "botaoAceitar": "Aceitar",
+    "botaoRecusar": "Recusar",
+    "analyticsId": "G-YCSN4DV5Q4"
+  }
 }
