@@ -1,96 +1,153 @@
 ---
+// ============================================================
+// Home — textos do topo e da lateral vêm do site.json (painel → Site);
+// os posts vêm de src/content/posts (painel → Posts).
+// ============================================================
 import Layout from '../layouts/Layout.astro';
+import site from '../data/site.json';
+import { getPosts, urlDoPost, slugify, dataCurta, dataIso, tempoDeLeitura, primeiroCodigo, contar } from '../lib/posts';
 
-// 1. Buscar todos os posts
-const allPosts = await Astro.glob('./posts/*.md');
+const posts = await getPosts();
+const destaque = posts[0]; // o mais recente
+const recentes = posts.slice(1, 11); // os 10 seguintes
+const categorias = contar(posts, 'category');
+const previa = destaque ? primeiroCodigo(destaque) : null;
+const h = site.hero;
 
-// 2. Ordenar por data (mais recente primeiro)
-const sortedPosts = allPosts.sort((a, b) => 
-    new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
-);
-
-// 3. Separar o Destaque (1º) dos Recentes (o resto)
-const featuredPost = sortedPosts[0];
-const recentPosts = sortedPosts.slice(1);
+// Separa o prompt "usuario@host:~$ comando" para colorir cada parte como num terminal
+const p = h.prompt.match(/^([^:]+):([^$]*)\$\s?(.*)$/);
 ---
 
 <Layout title="Início">
-	<header class="text-center mb-12">
-		<h1 class="text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-			Bem-vindo(a) ao <span class="text-blue-600">Blog do Cris</span>
-		</h1>
-		<p class="text-xl text-slate-600 max-w-2xl mx-auto">
-			Tecnologia e outras coisas que eu gosto
-		</p>
-	</header>
+  <!-- ===== Topo (hero) ===== -->
+  <section class="mx-auto max-w-[1120px] px-6 pb-14 pt-[72px]">
+    <p class="mb-5 font-mono text-sm text-suave">
+      {p ? (
+        <><span class="text-destaque">{p[1]}</span>:<span class="text-link">{p[2]}</span>$ {p[3]}</>
+      ) : h.prompt}
+    </p>
+    <h1 class="mb-6 max-w-[860px] text-[40px] font-semibold leading-[1.08] tracking-tight text-texto sm:text-[56px]">
+      {h.titulo} <span class="text-destaque">{h.tituloDestaque}</span>
+    </h1>
+    <p class="mb-9 max-w-[660px] text-[19px] leading-relaxed text-suave">{h.subtitulo}</p>
+    <div class="flex flex-wrap gap-3">
+      <a href={h.botaoPrincipal.url} class="inline-flex min-h-[48px] items-center rounded-lg bg-destaque px-[22px] font-semibold text-fundo transition-opacity hover:opacity-90">
+        {h.botaoPrincipal.texto}
+      </a>
+      <a href={h.botaoSecundario.url} class="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-borda-forte px-[22px] font-mono text-sm text-texto transition-colors hover:border-suave">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+        {h.botaoSecundario.texto}
+      </a>
+    </div>
+  </section>
 
-    {featuredPost && (
-        <section class="mb-16">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <span>🔥</span> Destaque
-            </h2>
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 hover:shadow-md transition-shadow">
-                <div class="flex flex-col md:flex-row items-start gap-6">
-                    <div class="flex-1">
-                        {featuredPost.frontmatter.category && (
-                            <span class="text-blue-600 font-bold text-xs uppercase tracking-wide mb-2 block">
-                                {featuredPost.frontmatter.category}
-                            </span>
-                        )}
-                        
-                        <h2 class="text-3xl font-bold text-slate-900 mb-3">
-                            <a href={featuredPost.url} class="hover:text-blue-600 transition-colors">
-                                {featuredPost.frontmatter.title}
-                            </a>
-                        </h2>
-                        
-                        <p class="text-slate-600 mb-6 leading-relaxed line-clamp-3">
-                            {/* Tenta mostrar um resumo se existir, ou uma mensagem padrão */}
-                            {featuredPost.frontmatter.description || "Clique para ler este artigo incrível sobre " + featuredPost.frontmatter.title}
-                        </p>
-                        
-                        <div class="flex items-center gap-4">
-                            <a href={featuredPost.url} class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-blue-200 shadow-lg">
-                                Ler Artigo Completo
-                            </a>
-                            <span class="text-sm text-slate-400">
-                                {new Date(featuredPost.frontmatter.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+  <div class="mx-auto flex max-w-[1120px] flex-wrap gap-14 px-6 pb-20">
+    <!-- ===== Coluna principal ===== -->
+    <div class="flex min-w-0 flex-[999_1_600px] flex-col gap-14">
+      {!destaque && (
+        <p class="font-mono text-suave">// nenhum post publicado ainda</p>
+      )}
+
+      {destaque && (
+        <section aria-labelledby="titulo-destaque">
+          <h2 class="mb-[18px] font-mono text-sm font-medium text-suave">// destaque</h2>
+          <article class="overflow-hidden rounded-xl border border-borda bg-superficie">
+            <div class="flex h-10 items-center justify-between gap-4 border-b border-borda bg-barra px-4 font-mono text-xs text-suave">
+              <span class="flex min-w-0 items-center gap-2 truncate"><span class="h-2 w-2 shrink-0 rounded-full bg-destaque"></span>{destaque.id}.md</span>
+              <a href={`/categorias/${slugify(destaque.data.category)}/`} class="shrink-0 hover:text-texto">{destaque.data.category}</a>
             </div>
-        </section>
-    )}
-
-    {recentPosts.length > 0 && (
-        <section>
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <span>📰</span> Recentes
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {recentPosts.map((post) => (
-                    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all hover:-translate-y-1 flex flex-col h-full">
-                        <div class="mb-4">
-                            {post.frontmatter.category && (
-                                <span class="text-blue-600 font-bold text-xs uppercase tracking-wide">
-                                    {post.frontmatter.category}
-                                </span>
-                            )}
-                            <h3 class="text-xl font-bold text-slate-800 mt-2 leading-tight group">
-                                <a href={post.url} class="group-hover:text-blue-600 transition-colors">
-                                    {post.frontmatter.title}
-                                </a>
-                            </h3>
-                        </div>
-                        
-                        <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-                            <span>{new Date(post.frontmatter.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
-                            <a href={post.url} class="text-blue-600 font-medium hover:underline">Ler &rarr;</a>
-                        </div>
-                    </article>
+            <div class="flex flex-col gap-4 p-7">
+              <h3 id="titulo-destaque" class="m-0 text-[28px] font-semibold leading-tight">
+                <a href={urlDoPost(destaque)} class="text-texto hover:text-white">{destaque.data.title}</a>
+              </h3>
+              {destaque.data.description && <p class="m-0 text-[17px] leading-relaxed text-suave">{destaque.data.description}</p>}
+              {previa && (
+                <pre class="m-0 overflow-x-auto rounded-lg border border-divisor bg-codigo px-[18px] py-4 font-mono text-[13px] leading-[1.7] text-texto-2" aria-label={`Trecho de código em ${previa.lang}`}><code>{previa.code}</code></pre>
+              )}
+              <div class="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[13px] text-suave">
+                <time datetime={dataIso(destaque.data.date)}>{dataCurta(destaque.data.date)}</time>
+                <span>{tempoDeLeitura(destaque)} de leitura</span>
+                {destaque.data.tags.map((tag) => (
+                  <a href={`/tags/${slugify(tag)}/`} class="text-link hover:underline">#{tag}</a>
                 ))}
+              </div>
             </div>
+          </article>
         </section>
-    )}
+      )}
+
+      {destaque && (
+        <section id="posts" aria-labelledby="titulo-lista" class="scroll-mt-6">
+          <div class="mb-2 flex items-baseline justify-between">
+            <h2 id="titulo-lista" class="m-0 font-mono text-sm font-medium text-suave">// git log --posts</h2>
+            {posts.length > 11 && <a href="/busca" class="font-mono text-[13px] text-destaque hover:underline">ver todos →</a>}
+          </div>
+
+          {recentes.length === 0 && (
+            <p class="border-b border-divisor py-5 font-mono text-[13px] text-suave">// por enquanto, só o destaque aí em cima. Volte em breve.</p>
+          )}
+
+          {recentes.map((post) => (
+            <a href={urlDoPost(post)} class="group flex flex-wrap gap-x-6 gap-y-1.5 border-b border-divisor py-5 text-texto">
+              <time datetime={dataIso(post.data.date)} class="flex-[0_0_110px] pt-[3px] font-mono text-[13px] text-suave">{dataIso(post.data.date)}</time>
+              <span class="flex min-w-0 flex-[1_1_360px] flex-col gap-2">
+                <span class="text-lg font-semibold leading-snug group-hover:text-white">{post.data.title}</span>
+                {post.data.tags.length > 0 && <span class="font-mono text-xs text-link">{post.data.tags.map((t) => `#${t}`).join(' ')}</span>}
+              </span>
+              <span class="pt-1 font-mono text-xs text-suave">{tempoDeLeitura(post)}</span>
+            </a>
+          ))}
+        </section>
+      )}
+    </div>
+
+    <!-- ===== Coluna lateral ===== -->
+    <aside class="flex flex-[1_1_280px] flex-col gap-6">
+      <section class="flex flex-col gap-3.5 rounded-xl border border-borda bg-superficie p-[22px]">
+        <h2 class="m-0 font-mono text-[13px] font-medium text-suave">$ cat sobre.txt</h2>
+        <div class="flex items-center gap-3">
+          <img src={site.avatar} alt="" width="48" height="48" class="h-12 w-12 rounded-full border-2 border-destaque object-cover" />
+          <div class="flex flex-col gap-0.5">
+            <span class="font-semibold">{site.autor}</span>
+            <span class="text-sm text-suave">{site.sobreResumo.cargo}</span>
+          </div>
+        </div>
+        <p class="m-0 text-[15px] leading-relaxed text-suave">{site.sobreResumo.texto}</p>
+        <a href={site.sobreResumo.linkUrl} class="font-mono text-[13px] text-destaque hover:underline">{site.sobreResumo.linkTexto}</a>
+      </section>
+
+      {categorias.length > 0 && (
+        <section class="flex flex-col gap-3 rounded-xl border border-borda bg-superficie p-[22px]">
+          <h2 class="m-0 font-mono text-[13px] font-medium text-suave">ls ./categorias</h2>
+          <nav aria-label="Categorias" class="flex flex-col text-[15px]">
+            {categorias.map((c, i) => (
+              <a href={`/categorias/${c.slug}/`} class:list={['flex justify-between py-2 text-texto hover:text-destaque', i < categorias.length - 1 && 'border-b border-divisor']}>
+                <span>{c.nome}/</span>
+                <span class="font-mono text-xs text-suave">{c.total}</span>
+              </a>
+            ))}
+          </nav>
+        </section>
+      )}
+
+      {site.stack.length > 0 && (
+        <section class="flex flex-col gap-3 rounded-xl border border-borda bg-superficie p-[22px]">
+          <h2 class="m-0 font-mono text-[13px] font-medium text-suave">// stack</h2>
+          <div class="flex flex-wrap gap-2 font-mono text-xs">
+            {site.stack.map((item) => (
+              <a href={`/tags/${slugify(item)}/`} class="rounded-md border border-borda-forte px-2.5 py-1.5 text-texto-2 hover:border-destaque hover:text-destaque">{item}</a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {site.newsletter.ativa && site.newsletter.url && (
+        <section class="flex flex-col gap-3 rounded-xl border border-dashed border-borda-forte p-[22px]">
+          <h2 class="m-0 text-[17px] font-semibold">{site.newsletter.titulo}</h2>
+          <p class="m-0 text-sm leading-relaxed text-suave">{site.newsletter.texto}</p>
+          <a href={site.newsletter.url} class="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-destaque px-4 font-semibold text-fundo hover:opacity-90">Assinar</a>
+        </section>
+      )}
+    </aside>
+  </div>
 </Layout>
