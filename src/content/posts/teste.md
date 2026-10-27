@@ -1,5 +1,4 @@
 ---
-layout: ../../layouts/PostLayout.astro
 title: "Teste"
 author: "Cristopher Lima"
 date: "2026-02-23"
