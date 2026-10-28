@@ -1,113 +1,161 @@
 ---
+// ============================================================
+// Visual da página de um post: título, metadados, TL;DR, texto,
+// sumário lateral, caixa do autor e navegação anterior/próximo.
+// ============================================================
+import type { MarkdownHeading } from 'astro';
 import Layout from './Layout.astro';
+import site from '../data/site.json';
+import { type Post, urlDoPost, slugify, dataCurta, dataIso, tempoDeLeitura } from '../lib/posts';
 
-// 1. MUDANÇA AQUI: O Astro já passa a variável 'headings' automaticamente junto com o frontmatter!
-const { frontmatter, headings } = Astro.props;
+interface Props {
+  post: Post;
+  headings: MarkdownHeading[]; // títulos do texto, para o sumário
+  anterior?: Post; // post mais antigo
+  proximo?: Post; // post mais novo
+}
 
-// Função para formatar a data
-const dataFormatada = new Date(frontmatter.date).toLocaleDateString('pt-BR', {
-  timeZone: 'UTC',
-});
+const { post, headings, anterior, proximo } = Astro.props;
+const { title, description, date, category, tags, author } = post.data;
 
-// Filtramos os títulos para pegar apenas os H2 e H3 (assim o índice não fica poluído com títulos muito pequenos)
-const indice = headings?.filter((heading) => heading.depth === 2 || heading.depth === 3) || [];
+// Sumário: só os títulos de nível 2 e 3
+const sumario = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
-<Layout title={frontmatter.title}>
-    <article class="prose lg:prose-xl mx-auto mt-10 p-4">
-        {frontmatter.category && (
-            <span class="block text-blue-600 font-bold text-sm mb-2 uppercase tracking-wide">
-                {frontmatter.category}
-            </span>
-        )}
+<Layout title={title} description={description || site.descricao} type="article">
+  <div class="mx-auto flex max-w-[1120px] flex-wrap gap-16 px-6 pb-20 pt-14">
+    <article class="min-w-0 max-w-[760px] flex-[999_1_640px]">
+      <!-- Caminho: posts / categoria / post -->
+      <nav aria-label="Você está em" class="mb-5 font-mono text-[13px] text-suave">
+        <a href="/" class="hover:text-texto">posts</a> /
+        <a href={`/categorias/${slugify(category)}/`} class="hover:text-texto">{slugify(category)}</a> /
+        <span class="text-destaque">{post.id}</span>
+      </nav>
 
-        <h1 class="text-blue-700 font-extrabold text-4xl mb-4">{frontmatter.title}</h1>
-        
-        <div class="flex items-center text-gray-500 text-sm mb-6 border-b border-slate-200 pb-4">
-            <span class="mr-2">✍️ {frontmatter.author}</span>
-            <span class="mx-2">•</span>
-            <span>📅 {dataFormatada}</span>
+      <h1 class="mb-5 text-[34px] font-semibold leading-[1.15] tracking-tight text-white sm:text-[44px]">{title}</h1>
+
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2.5 border-b border-borda pb-7 font-mono text-[13px] text-suave">
+        <span class="flex items-center gap-2.5">
+          <img src={site.avatar} alt="" width="32" height="32" class="h-8 w-8 rounded-full border-2 border-destaque object-cover" />
+          {author}
+        </span>
+        <time datetime={dataIso(date)}>{dataCurta(date)}</time>
+        <span>{tempoDeLeitura(post)} de leitura</span>
+        {tags.length > 0 && (
+          <span class="flex flex-wrap gap-x-2">
+            {tags.map((tag) => <a href={`/tags/${slugify(tag)}/`} class="text-link hover:underline">#{tag}</a>)}
+          </span>
+        )}
+      </div>
+
+      {description && (
+        <div class="my-8 rounded-[10px] border border-borda bg-superficie px-[22px] py-5">
+          <p class="mb-2 font-mono text-xs font-bold text-destaque">Resumo</p>
+          <p class="m-0 text-base leading-relaxed text-texto-2">{description}</p>
         </div>
+      )}
 
-        {/* 2. MUDANÇA AQUI: Renderização do Índice (Table of Contents) */}
-        {indice.length > 0 && (
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-10 not-prose">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">📖 Índice</h2>
-                <ul class="space-y-3">
-                    {indice.map((heading) => (
-                        <li style={{ paddingLeft: `${(heading.depth - 2) * 1.5}rem` }}>
-                            <a 
-                                href={`#${heading.slug}`} 
-                                class="text-blue-600 hover:underline hover:text-blue-800 text-sm font-medium transition-colors"
-                            >
-                                {heading.text}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        )}
+      <div class="post-conteudo prose prose-blog prose-lg max-w-none prose-headings:scroll-mt-6 prose-a:underline-offset-4 prose-code:before:content-none prose-code:after:content-none prose-img:rounded-lg prose-th:text-texto">
+        <slot />
+      </div>
 
-        <div class="text-gray-800 leading-relaxed relative">
-            <slot />
+      <!-- Autor -->
+      <div class="mt-12 flex flex-wrap items-center gap-4 rounded-xl border border-borda p-6">
+        <img src={site.avatar} alt="" width="56" height="56" class="h-14 w-14 rounded-full border-2 border-destaque object-cover" />
+        <div class="flex flex-[1_1_300px] flex-col gap-1">
+          <span class="text-[17px] font-semibold">{site.autor}</span>
+          <span class="text-[15px] leading-relaxed text-suave">{site.sobreResumo.texto}</span>
         </div>
+        <a href={site.sobreResumo.linkUrl} class="font-mono text-[13px] text-destaque hover:underline">{site.sobreResumo.linkTexto}</a>
+      </div>
 
-        {frontmatter.tags && (
-            <div class="mt-12 pt-6 border-t border-slate-200">
-                <div class="flex flex-wrap gap-2">
-                    {frontmatter.tags.map((tag) => (
-                        <span class="bg-slate-100 text-slate-600 text-sm font-medium px-3 py-1 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-default">
-                            #{tag}
-                        </span>
-                    ))}
-                </div>
-            </div>
-        )}
+      <!-- Anterior / próximo -->
+      {(anterior || proximo) && (
+        <nav aria-label="Navegação entre posts" class="mt-6 flex flex-wrap gap-4">
+          {anterior && (
+            <a href={urlDoPost(anterior)} class="flex flex-[1_1_260px] flex-col gap-1.5 rounded-[10px] border border-borda px-5 py-[18px] hover:border-borda-forte">
+              <span class="font-mono text-xs text-suave">← anterior</span>
+              <span class="font-semibold text-texto">{anterior.data.title}</span>
+            </a>
+          )}
+          {proximo && (
+            <a href={urlDoPost(proximo)} class="flex flex-[1_1_260px] flex-col gap-1.5 rounded-[10px] border border-borda px-5 py-[18px] text-right hover:border-borda-forte">
+              <span class="font-mono text-xs text-suave">próximo →</span>
+              <span class="font-semibold text-texto">{proximo.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )}
     </article>
-</Layout>
 
-{/* 3. MUDANÇA AQUI: Script para injetar o botão de copiar nos blocos de código */}
-<script is:inline>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Encontra todos os blocos de código na página
-        const codeBlocks = document.querySelectorAll('pre');
+    <!-- Sumário lateral (só aparece se o post tiver títulos) -->
+    {sumario.length > 0 && (
+      <aside class="hidden flex-[1_1_220px] lg:block">
+        <div class="sticky top-8 flex flex-col gap-3.5 font-mono text-[13px]">
+          <h2 class="m-0 text-[13px] font-medium text-suave">// nesta página</h2>
+          <nav aria-label="Sumário" class="flex flex-col gap-2.5">
+            {sumario.map((h) => (
+              <a href={`#${h.slug}`} data-sumario={h.slug} class:list={['text-suave hover:text-texto', h.depth === 3 && 'pl-3']}>
+                {h.text}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </aside>
+    )}
+  </div>
 
-        codeBlocks.forEach((pre) => {
-            // Garante que o bloco tem posição relativa para ancorar o botão
-            pre.style.position = 'relative';
-
-            // Cria o botão
-            const copyButton = document.createElement('button');
-            copyButton.className = 'absolute top-3 right-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg transition-all backdrop-blur-sm border border-slate-600';
-            copyButton.innerHTML = 'Copiar';
-
-            // Adiciona a ação de clique
-            copyButton.addEventListener('click', async () => {
-                // Pega o texto puro dentro do código
-                const code = pre.querySelector('code');
-                const text = code ? code.innerText : pre.innerText;
-
-                try {
-                    await navigator.clipboard.writeText(text);
-                    
-                    // Feedback visual
-                    copyButton.innerHTML = '✅ Copiado!';
-                    copyButton.classList.replace('text-slate-300', 'text-green-400');
-                    copyButton.classList.replace('bg-slate-700/50', 'bg-slate-800');
-                    
-                    // Retorna ao estado normal após 2 segundos
-                    setTimeout(() => {
-                        copyButton.innerHTML = 'Copiar';
-                        copyButton.classList.replace('text-green-400', 'text-slate-300');
-                        copyButton.classList.replace('bg-slate-800', 'bg-slate-700/50');
-                    }, 2000);
-                } catch (err) {
-                    console.error('Falha ao copiar', err);
-                }
-            });
-
-            // Adiciona o botão dentro do <pre>
-            pre.appendChild(copyButton);
-        });
+  <!-- Blocos de código: barra com a linguagem + botão copiar -->
+  <script is:inline>
+    document.querySelectorAll('.post-conteudo pre.astro-code').forEach((pre) => {
+      const lang = pre.dataset.language || 'texto';
+      const figura = document.createElement('figure');
+      figura.className = 'bloco-codigo';
+      const barra = document.createElement('figcaption');
+      const nome = document.createElement('span');
+      nome.textContent = lang === 'plaintext' ? 'texto' : lang;
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.textContent = 'copiar';
+      botao.setAttribute('aria-label', 'Copiar código');
+      botao.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pre.innerText);
+          botao.textContent = 'copiado ✓';
+        } catch (e) {
+          botao.textContent = 'erro ao copiar';
+        }
+        setTimeout(() => (botao.textContent = 'copiar'), 2000);
+      });
+      barra.append(nome, botao);
+      pre.replaceWith(figura);
+      figura.append(barra, pre);
     });
-</script>
+
+    // Destaca no sumário a seção que está na tela
+    const links = document.querySelectorAll('[data-sumario]');
+    if (links.length && 'IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entradas) => {
+        entradas.forEach((e) => {
+          if (!e.isIntersecting) return;
+          links.forEach((l) => l.classList.toggle('sumario-ativo', l.dataset.sumario === e.target.id));
+        });
+      }, { rootMargin: '0px 0px -70% 0px' });
+      links.forEach((l) => {
+        const alvo = document.getElementById(l.dataset.sumario);
+        if (alvo) obs.observe(alvo);
+      });
+    }
+  </script>
+
+  <style is:global>
+    .bloco-codigo { margin: 1.75rem 0; border: 1px solid #222A35; border-radius: 10px; overflow: hidden; background: #0B0F14; }
+    .post-conteudo .bloco-codigo figcaption { margin: 0; display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 8px 0 16px; border-bottom: 1px solid #222A35; background: #0F141A; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #9DA7B3; }
+    .bloco-codigo button { min-height: 32px; padding: 0 12px; border: 1px solid #2A3240; border-radius: 6px; background: transparent; color: #9DA7B3; font-family: inherit; font-size: 12px; cursor: pointer; }
+    .bloco-codigo button:hover { color: #E6EDF3; border-color: #9DA7B3; }
+    .post-conteudo pre.astro-code { margin: 0 !important; border-radius: 0 !important; background-color: #0B0F14 !important; padding: 20px !important; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.75; }
+    .post-conteudo :not(pre) > code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; font-weight: 400; padding: 2px 6px; background: #1C232D; border-radius: 4px; }
+    .post-conteudo table { display: block; overflow-x: auto; }
+    .sumario-ativo { color: #F5A524 !important; }
+  </style>
+</Layout>
