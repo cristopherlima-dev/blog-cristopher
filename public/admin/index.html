@@ -55,6 +55,116 @@
         toPreview: ({ lang = 'text', code = '' } = {}) => '```' + lang + '\n' + code + '\n```',
       });
     </script>
+
+    <!--
+      Botão "Publicar" (envia para o GitHub).
+      Só aparece quando o painel roda no seu computador (npm run dev).
+      O "Salvar" do painel continua gravando só na pasta local.
+    -->
+    <style>
+      #pub-botao { position: fixed; right: 20px; bottom: 20px; z-index: 9999; display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: #F5A524; color: #0D1117; font: 600 15px system-ui, sans-serif; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+      #pub-botao:hover { filter: brightness(1.05); }
+      #pub-janela { width: min(560px, calc(100vw - 32px)); padding: 0; border: 1px solid #2A3240; border-radius: 12px; background: #11161D; color: #E6EDF3; font: 15px/1.5 system-ui, sans-serif; }
+      #pub-janela::backdrop { background: rgba(0,0,0,.6); }
+      #pub-janela .pub-corpo { display: flex; flex-direction: column; gap: 14px; padding: 22px; }
+      #pub-janela h2 { margin: 0; font-size: 18px; }
+      #pub-janela .pub-info { margin: 0; color: #9DA7B3; font-size: 14px; }
+      #pub-janela ul { margin: 0; padding: 10px 14px; max-height: 220px; overflow: auto; list-style: none; background: #0B0F14; border: 1px solid #222A35; border-radius: 8px; font: 13px/1.8 ui-monospace, monospace; }
+      #pub-janela .pub-estado { display: inline-block; width: 72px; color: #F5A524; }
+      #pub-janela label { display: block; margin-bottom: 6px; font-size: 13px; color: #9DA7B3; }
+      #pub-janela input { width: 100%; box-sizing: border-box; min-height: 42px; padding: 0 12px; border: 1px solid #2A3240; border-radius: 8px; background: #0B0F14; color: #E6EDF3; font: inherit; }
+      #pub-janela .pub-acoes { display: flex; justify-content: flex-end; gap: 10px; }
+      #pub-janela button { min-height: 42px; padding: 0 16px; border-radius: 8px; font: 600 14px system-ui, sans-serif; cursor: pointer; }
+      #pub-cancelar { border: 1px solid #2A3240; background: transparent; color: #9DA7B3; }
+      #pub-confirmar { border: 0; background: #F5A524; color: #0D1117; }
+      #pub-confirmar:disabled { opacity: .5; cursor: wait; }
+      #pub-msg { margin: 0; font-size: 14px; white-space: pre-wrap; }
+      #pub-msg:empty { display: none; }
+      #pub-msg.erro { color: #FF7B72; }
+      #pub-msg.ok { color: #3FB950; }
+    </style>
+    <script type="module">
+      const estados = { M: 'alterado', A: 'novo', '??': 'novo', D: 'apagado', R: 'renomeado' };
+
+      // Monta o botão e a janela de confirmação
+      document.body.insertAdjacentHTML('beforeend', `
+        <button id="pub-botao" type="button" title="Enviar as alterações salvas para o GitHub">⬆ Publicar</button>
+        <dialog id="pub-janela" aria-labelledby="pub-titulo">
+          <form method="dialog" class="pub-corpo">
+            <h2 id="pub-titulo">Publicar no GitHub</h2>
+            <p class="pub-info" id="pub-info"></p>
+            <ul id="pub-lista"></ul>
+            <div id="pub-campo">
+              <label for="pub-mensagem">Descrição desta publicação</label>
+              <input id="pub-mensagem" type="text" autocomplete="off">
+            </div>
+            <p id="pub-msg" role="status"></p>
+            <div class="pub-acoes">
+              <button id="pub-cancelar" value="cancelar">Fechar</button>
+              <button id="pub-confirmar" type="button">Publicar</button>
+            </div>
+          </form>
+        </dialog>`);
+
+      const $ = (id) => document.getElementById(id);
+      const botao = $('pub-botao'), janela = $('pub-janela'), lista = $('pub-lista');
+      const info = $('pub-info'), msg = $('pub-msg'), confirmar = $('pub-confirmar');
+      const campo = $('pub-campo'), mensagem = $('pub-mensagem');
+      const escapar = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+      const aviso = (texto, tipo = '') => { msg.textContent = texto; msg.className = tipo; };
+
+      // Só mostra o botão se o servidor local responder (no site publicado ele não existe)
+      fetch('/__publicar').then((r) => { if (r.ok) botao.style.display = 'flex'; }).catch(() => {});
+
+      botao.addEventListener('click', async () => {
+        aviso('');
+        info.textContent = '';
+        lista.innerHTML = '<li>Verificando alterações…</li>';
+        confirmar.hidden = false; confirmar.disabled = false; campo.hidden = false;
+        janela.showModal();
+        try {
+          const r = await fetch('/__publicar');
+          const dados = await r.json();
+          if (!r.ok) throw new Error(dados.erro);
+          if (!dados.arquivos.length) {
+            lista.innerHTML = '<li>Nada para publicar. Salve alguma alteração no painel primeiro.</li>';
+            confirmar.hidden = true; campo.hidden = true;
+            return;
+          }
+          info.textContent = `${dados.arquivos.length} arquivo(s) serão enviados para a branch "${dados.branch}":`;
+          lista.innerHTML = dados.arquivos
+            .map((a) => `<li><span class="pub-estado">${escapar(estados[a.estado] || a.estado)}</span>${escapar(a.caminho)}</li>`)
+            .join('');
+          const agora = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+          mensagem.value = `conteúdo: atualização do blog (${agora})`;
+          mensagem.focus();
+          mensagem.select();
+        } catch (e) {
+          lista.innerHTML = '';
+          aviso('Erro ao verificar: ' + e.message, 'erro');
+          confirmar.hidden = true; campo.hidden = true;
+        }
+      });
+
+      confirmar.addEventListener('click', async () => {
+        confirmar.disabled = true;
+        aviso('Enviando para o GitHub…');
+        try {
+          const r = await fetch('/__publicar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensagem: mensagem.value }),
+          });
+          const dados = await r.json();
+          if (!r.ok) throw new Error(dados.erro);
+          aviso(`Publicado! Commit ${dados.commit} enviado para "${dados.branch}".\nO Cloudflare atualiza o site em 1 a 2 minutos.`, 'ok');
+          confirmar.hidden = true; campo.hidden = true;
+        } catch (e) {
+          aviso('Não foi possível publicar:\n' + e.message, 'erro');
+          confirmar.disabled = false;
+        }
+      });
+    </script>
   </head>
   <body></body>
 </html>

@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import tailwind from '@astrojs/tailwind';
+import publicarPlugin from './scripts/publicar-plugin.mjs';
 
 export default defineConfig({
   site: 'https://www.cristopherlima.com.br',
@@ -8,6 +9,11 @@ export default defineConfig({
   integrations: [tailwind()],
   adapter: cloudflare(),
   output: 'server',
+
+  // Botão "Publicar" do painel (só funciona no "npm run dev")
+  vite: {
+    plugins: [publicarPlugin()],
+  },
 
   markdown: {
     // Realce de código por linguagem (Shiki) com tema escuro no estilo do GitHub
