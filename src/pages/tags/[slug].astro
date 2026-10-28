@@ -1,0 +1,32 @@
+---
+// Posts de uma tag: /tags/sqlserver/
+import Layout from '../../layouts/Layout.astro';
+import ListaPosts from '../../components/ListaPosts.astro';
+import { getPosts, contar, slugify } from '../../lib/posts';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return contar(posts, 'tags').map((t) => ({
+    params: { slug: t.slug },
+    props: { nome: t.nome, posts: posts.filter((p) => p.data.tags.some((tag) => slugify(tag) === t.slug)) },
+  }));
+}
+
+const { nome, posts } = Astro.props;
+---
+
+<Layout title={`#${nome}`} description={`Posts com a tag ${nome}.`}>
+  <section class="mx-auto max-w-[760px] px-6 pb-20 pt-14">
+    <nav aria-label="Você está em" class="mb-5 font-mono text-[13px] text-suave">
+      <a href="/tags/" class="hover:text-texto">tags</a> / <span class="text-destaque">{Astro.params.slug}</span>
+    </nav>
+    <h1 class="mb-2 text-4xl font-semibold tracking-tight text-white sm:text-[44px]"><span class="text-link">#</span>{nome}</h1>
+    <p class="mb-8 font-mono text-[13px] text-suave">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+
+    <ListaPosts posts={posts} />
+
+    <a href="/tags/" class="mt-8 inline-block font-mono text-[13px] text-destaque hover:underline">← todas as tags</a>
+  </section>
+</Layout>

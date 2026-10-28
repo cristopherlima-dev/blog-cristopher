@@ -1,0 +1,32 @@
+---
+// Posts de uma categoria: /categorias/banco-de-dados/
+import Layout from '../../layouts/Layout.astro';
+import ListaPosts from '../../components/ListaPosts.astro';
+import { getPosts, contar, slugify } from '../../lib/posts';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return contar(posts, 'category').map((c) => ({
+    params: { slug: c.slug },
+    props: { nome: c.nome, posts: posts.filter((p) => slugify(p.data.category) === c.slug) },
+  }));
+}
+
+const { nome, posts } = Astro.props;
+---
+
+<Layout title={`Categoria: ${nome}`} description={`Posts sobre ${nome}.`}>
+  <section class="mx-auto max-w-[760px] px-6 pb-20 pt-14">
+    <nav aria-label="Você está em" class="mb-5 font-mono text-[13px] text-suave">
+      <a href="/categorias/" class="hover:text-texto">categorias</a> / <span class="text-destaque">{Astro.params.slug}</span>
+    </nav>
+    <h1 class="mb-2 text-4xl font-semibold tracking-tight text-white sm:text-[44px]">{nome}</h1>
+    <p class="mb-8 font-mono text-[13px] text-suave">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+
+    <ListaPosts posts={posts} />
+
+    <a href="/categorias/" class="mt-8 inline-block font-mono text-[13px] text-destaque hover:underline">← todas as categorias</a>
+  </section>
+</Layout>

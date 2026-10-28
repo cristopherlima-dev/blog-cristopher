@@ -1,94 +1,135 @@
 ---
+// ============================================================
+// Busca: a página já vem com um índice leve de todos os posts
+// e o filtro roda no navegador, enquanto você digita.
+// Não precisa de servidor nem de serviço externo.
+// ============================================================
 import Layout from '../layouts/Layout.astro';
+import { getPosts, urlDoPost, dataIso } from '../lib/posts';
 
-// 1. Obter o termo de pesquisa da URL (ex: ?q=python)
-const query = Astro.url.searchParams.get('q') || '';
+export const prerender = true;
 
-// 2. Buscar todos os posts
-const allPosts = await Astro.glob('./posts/*.md');
+// Tira a marcação do Markdown para buscar só no texto
+const textoLimpo = (md = '') =>
+  md
+    .replace(/```[\w#+-]*\n?/g, ' ') // marcadores de bloco de código (o código continua pesquisável)
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // imagens
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links -> só o texto
+    .replace(/[#>*_`|~-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-// 3. Filtrar posts (se houver termo de busca)
-const searchResults = query 
-  ? allPosts.filter((post) => {
-      const title = post.frontmatter.title.toLowerCase();
-      const description = (post.frontmatter.description || '').toLowerCase();
-      const tags = (post.frontmatter.tags || []).join(' ').toLowerCase();
-      const body = post.rawContent().toLowerCase(); // Pesquisa também no conteúdo
-      const searchTerm = query.toLowerCase();
-
-      return title.includes(searchTerm) || 
-             description.includes(searchTerm) || 
-             tags.includes(searchTerm) ||
-             body.includes(searchTerm);
-    })
-  : [];
+const indice = (await getPosts()).map((p) => ({
+  titulo: p.data.title,
+  descricao: p.data.description,
+  categoria: p.data.category,
+  tags: p.data.tags,
+  data: dataIso(p.data.date),
+  url: urlDoPost(p),
+  texto: textoLimpo(p.body),
+}));
 ---
 
-<Layout title="Busca">
-    <header class="text-center mb-12">
-        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
-            Pesquisar no <span class="text-blue-600">Blog</span>
-        </h1>
+<Layout title="Busca" description="Pesquise nos posts do blog.">
+  <section class="mx-auto max-w-[760px] px-6 pb-20 pt-14">
+    <p class="mb-5 font-mono text-[13px] text-suave">
+      <span class="text-destaque">cris@curitiba</span>:<span class="text-link">~</span>$ grep -ri
+    </p>
+    <h1 class="mb-8 text-4xl font-semibold tracking-tight text-white sm:text-[44px]">Buscar</h1>
 
-        <form action="/busca" method="get" class="max-w-xl mx-auto">
-            <div class="relative">
-                <input 
-                    type="text" 
-                    name="q" 
-                    value={query}
-                    placeholder="Digite o que procura (ex: python, setup...)" 
-                    class="w-full px-6 py-4 rounded-full border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-lg shadow-sm transition-colors"
-                    autofocus
-                />
-                <button 
-                    type="submit" 
-                    class="absolute right-3 top-3 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
-                    aria-label="Pesquisar"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </button>
-            </div>
-        </form>
-    </header>
+    <form role="search" action="/busca" method="get" class="mb-3" id="form-busca">
+      <label for="campo-busca" class="sr-only">Termo de busca</label>
+      <div class="flex items-center gap-3 rounded-xl border border-borda-forte bg-superficie px-4 focus-within:border-destaque">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="shrink-0 text-suave" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-5-5"></path></svg>
+        <input
+          id="campo-busca"
+          name="q"
+          type="search"
+          autocomplete="off"
+          placeholder="ex.: trigger, python, sql server…"
+          class="min-h-[56px] w-full bg-transparent text-lg text-texto placeholder:text-suave/70 focus:outline-none"
+        />
+        <kbd class="hidden rounded border border-borda-forte px-1.5 py-0.5 font-mono text-[11px] text-suave sm:inline">Esc</kbd>
+      </div>
+    </form>
+    <p id="resumo-busca" class="mb-6 font-mono text-[13px] text-suave" aria-live="polite"></p>
 
-    <section>
-        {query && (
-            <p class="text-slate-600 mb-6 text-center">
-                Encontrados <strong class="text-slate-900">{searchResults.length}</strong> resultados para "<em>{query}</em>"
-            </p>
-        )}
+    <div id="resultados"></div>
+  </section>
 
-        {searchResults.length > 0 ? (
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {searchResults.map((post) => (
-                    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all hover:-translate-y-1">
-                        <div class="mb-4">
-                            {post.frontmatter.category && (
-                                <span class="text-blue-600 font-bold text-xs uppercase tracking-wide">
-                                    {post.frontmatter.category}
-                                </span>
-                            )}
-                            <h2 class="text-xl font-bold text-slate-800 mt-2 leading-tight">
-                                <a href={post.url} class="hover:text-blue-600 transition-colors">
-                                    {post.frontmatter.title}
-                                </a>
-                            </h2>
-                        </div>
-                        <p class="text-slate-600 text-sm mb-4 line-clamp-2">
-                            {post.frontmatter.description || "Clique para ler o artigo completo..."}
-                        </p>
-                        <a href={post.url} class="text-blue-600 font-medium hover:underline text-sm">
-                            Ler artigo &rarr;
-                        </a>
-                    </article>
-                ))}
-            </div>
-        ) : query ? (
-            <div class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
-                <p class="text-slate-500 text-lg">Nenhum post encontrado. Tente outro termo.</p>
-            </div>
-        ) : null}
-    </section>
+  <script is:inline type="application/json" id="indice-busca" set:html={JSON.stringify(indice).replace(/</g, '\\u003c')}></script>
+
+  <script is:inline>
+    const indice = JSON.parse(document.getElementById('indice-busca').textContent);
+    const campo = document.getElementById('campo-busca');
+    const resultados = document.getElementById('resultados');
+    const resumo = document.getElementById('resumo-busca');
+
+    // Ignora acentos, maiúsculas e pontuação: "Configuração!" acha "configuracao"
+    // (mantém # e + por causa de "C#" e "C++")
+    const normalizar = (t) =>
+      (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9#+]+/g, ' ');
+    const escapar = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+    // Prepara o texto de cada post uma vez só
+    const base = indice.map((p) => ({
+      ...p,
+      _titulo: normalizar(p.titulo),
+      _tudo: normalizar([p.titulo, p.descricao, p.categoria, p.tags.join(' '), p.texto].join(' ')),
+    }));
+
+    // Trecho do texto em volta da palavra encontrada
+    function trecho(p, termo) {
+      // aqui só tira acentos, para a posição bater com o texto original
+      const alvo = p.texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const i = alvo.indexOf(termo);
+      if (i < 0) return p.descricao || '';
+      const ini = Math.max(0, i - 60);
+      return (ini > 0 ? '…' : '') + p.texto.slice(ini, i + termo.length + 100) + '…';
+    }
+
+    function buscar() {
+      const q = campo.value.trim();
+      const palavras = normalizar(q).split(/\s+/).filter(Boolean);
+
+      // Mantém o termo no endereço (?q=...) para dar para compartilhar a busca
+      const url = new URL(location.href);
+      q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+      history.replaceState(null, '', url);
+
+      if (!palavras.length) {
+        resumo.textContent = `${indice.length} post(s) no blog. Digite para buscar.`;
+        resultados.innerHTML = '';
+        return;
+      }
+
+      // Todas as palavras precisam aparecer; título vale mais na ordenação
+      const achados = base
+        .filter((p) => palavras.every((w) => p._tudo.includes(w)))
+        .map((p) => ({ p, pontos: palavras.reduce((s, w) => s + (p._titulo.includes(w) ? 10 : 1), 0) }))
+        .sort((a, b) => b.pontos - a.pontos || b.p.data.localeCompare(a.p.data));
+
+      resumo.textContent = achados.length
+        ? `${achados.length} resultado(s) para "${q}"`
+        : `Nada encontrado para "${q}". Tente outra palavra.`;
+
+      resultados.innerHTML = achados
+        .map(({ p }) => `
+          <a href="${p.url}" class="group flex flex-col gap-2 border-b border-divisor py-5">
+            <span class="font-mono text-xs text-suave">${p.data} · ${escapar(p.categoria)}</span>
+            <span class="text-lg font-semibold text-texto group-hover:text-white">${escapar(p.titulo)}</span>
+            <span class="text-[15px] leading-relaxed text-suave">${escapar(trecho(p, palavras[0]))}</span>
+          </a>`)
+        .join('');
+    }
+
+    campo.addEventListener('input', buscar);
+    document.getElementById('form-busca').addEventListener('submit', (e) => { e.preventDefault(); buscar(); });
+    campo.addEventListener('keydown', (e) => { if (e.key === 'Escape') { campo.value = ''; buscar(); } });
+
+    // Abre já buscando se vier ?q= no endereço
+    campo.value = new URLSearchParams(location.search).get('q') || '';
+    buscar();
+    campo.focus();
+  </script>
 </Layout>

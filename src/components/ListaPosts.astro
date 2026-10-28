@@ -1,0 +1,26 @@
+---
+// Lista de posts no estilo "git log" (data · título · tags · tempo de leitura).
+// Usada na Home, nas páginas de categoria e de tag.
+import { type Post, urlDoPost, dataIso, tempoDeLeitura } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+  vazio?: string; // mensagem quando não há posts
+}
+
+const { posts, vazio = '// nenhum post por aqui ainda.' } = Astro.props;
+---
+
+{posts.length === 0 && <p class="border-b border-divisor py-5 font-mono text-[13px] text-suave">{vazio}</p>}
+
+{posts.map((post) => (
+  <a href={urlDoPost(post)} class="group flex flex-wrap gap-x-6 gap-y-1.5 border-b border-divisor py-5 text-texto">
+    <time datetime={dataIso(post.data.date)} class="flex-[0_0_110px] pt-[3px] font-mono text-[13px] text-suave">{dataIso(post.data.date)}</time>
+    <span class="flex min-w-0 flex-[1_1_360px] flex-col gap-2">
+      <span class="text-lg font-semibold leading-snug group-hover:text-white">{post.data.title}</span>
+      {post.data.description && <span class="text-[15px] leading-relaxed text-suave">{post.data.description}</span>}
+      {post.data.tags.length > 0 && <span class="font-mono text-xs text-link">{post.data.tags.map((t) => `#${t}`).join(' ')}</span>}
+    </span>
+    <span class="pt-1 font-mono text-xs text-suave">{tempoDeLeitura(post)}</span>
+  </a>
+))}
